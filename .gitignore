@@ -1,0 +1,15 @@
+# Godot
+.godot/
+*.translation
+export_presets.cfg
+*.tmp
+
+# Blender backups
+*.blend1
+*.blend2
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
