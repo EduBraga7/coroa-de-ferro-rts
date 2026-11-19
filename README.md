@@ -42,7 +42,7 @@ Você comanda o seu reino contra uma IA rival: colete ouro e madeira, construa s
 1. Instale o [Godot 4.7.x](https://godotengine.org/download).
 2. Clone o repositório:
    ```bash
-   git clone https://github.com/SEU_USUARIO/coroa-de-ferro-rts.git
+   git clone https://github.com/EduBraga7/coroa-de-ferro-rts.git
    ```
 3. Abra o Godot → **Import** → selecione `project.godot`.
 4. Pressione **F5** (cena principal: `scenes/main.tscn`).
