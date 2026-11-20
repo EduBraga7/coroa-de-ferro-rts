@@ -14,14 +14,16 @@ var _arc_height: float = 2.0
 var _progress: float = 0.0
 var _duration: float = 0.5
 var _active: bool = false
+var _sfx: SFXManager = null
 
 
-func launch(from_pos: Vector3, target_node: Variant, dmg: float, src: Variant, src_team: int) -> void:
+func launch(from_pos: Vector3, target_node: Variant, dmg: float, src: Variant, src_team: int, sfx_mgr: SFXManager = null) -> void:
 	_start_pos = from_pos
 	_target = target_node
 	_damage = dmg
 	_attacker = src
 	_team = src_team
+	_sfx = sfx_mgr
 	global_position = from_pos
 
 	if _target != null and is_instance_valid(_target) and not _target.is_queued_for_deletion():
@@ -67,12 +69,30 @@ func _build_arrow_mesh() -> void:
 	fbox.size = Vector3(0.14, 0.14, 0.22)
 	fletch.mesh = fbox
 	fletch.position = Vector3(0.0, 0.0, 0.42)
+	var team_col: Color = Color(0.25, 0.65, 1.0) if _team == 0 else Color(0.95, 0.28, 0.25)
 	var mat_team: StandardMaterial3D = StandardMaterial3D.new()
-	mat_team.albedo_color = Color(0.25, 0.65, 1.0) if _team == 0 else Color(0.95, 0.28, 0.25)
+	mat_team.albedo_color = team_col
 	mat_team.emission_enabled = true
-	mat_team.emission = mat_team.albedo_color * 0.5
+	mat_team.emission = team_col * 0.5
 	fletch.material_override = mat_team
 	add_child(fletch)
+
+	# Rastro luminoso sutil em voo
+	var trail: MeshInstance3D = MeshInstance3D.new()
+	var t_mesh: QuadMesh = QuadMesh.new()
+	t_mesh.size = Vector2(0.07, 1.15)
+	trail.mesh = t_mesh
+	trail.position = Vector3(0.0, 0.0, 0.92)
+	trail.rotation.x = PI * 0.5
+	var t_mat: StandardMaterial3D = StandardMaterial3D.new()
+	t_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	t_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	t_mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	t_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	t_mat.albedo_color = Color(team_col.r, team_col.g, team_col.b, 0.42)
+	trail.material_override = t_mat
+	trail.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(trail)
 
 
 func _process(delta: float) -> void:
@@ -97,7 +117,10 @@ func _process(delta: float) -> void:
 
 	if _progress >= 1.0:
 		_active = false
-		if _target != null and is_instance_valid(_target) and not _target.is_queued_for_deletion() and _target.has_method("take_damage"):
-			var att: Variant = _attacker if (_attacker != null and is_instance_valid(_attacker) and not _attacker.is_queued_for_deletion()) else null
-			_target.take_damage(_damage, att)
+		if _target != null and is_instance_valid(_target) and not _target.is_queued_for_deletion():
+			if _sfx != null and not ("fog_hidden" in _target and bool(_target.fog_hidden)):
+				_sfx.play_arrow_hit(_target_last_pos)
+			if _target.has_method("take_damage"):
+				var att: Variant = _attacker if (_attacker != null and is_instance_valid(_attacker) and not _attacker.is_queued_for_deletion()) else null
+				_target.take_damage(_damage, att, true)
 		queue_free()

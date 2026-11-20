@@ -8,6 +8,9 @@ export_presets.cfg
 *.blend1
 *.blend2
 
+# Python (scripts de geração rodando dentro do Blender)
+__pycache__/
+
 # OS / editor
 .DS_Store
 Thumbs.db

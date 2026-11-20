@@ -12,11 +12,12 @@ class_name RTSCamera
 @export var zoom_speed: float = 4.8
 @export var min_zoom: float = 10.0
 @export var max_zoom: float = 68.0
-@export var map_limit: float = 84.0
+@export var map_limit: float = 94.0
 @export var rotate_speed: float = 2.0
 @export var edge_pan_margin: float = 14.0
 
 var camera: Camera3D
+var audio_listener: AudioListener3D = null
 var current_zoom: float = 34.0
 var target_zoom: float = 34.0
 var target_pos: Vector3 = Vector3(-52.0, 0.0, 52.0)
@@ -48,6 +49,12 @@ func _ready() -> void:
 		camera.near = 0.5
 		camera.fov = 48.0
 		add_child(camera)
+
+	audio_listener = AudioListener3D.new()
+	audio_listener.name = "AudioListener3D"
+	audio_listener.position = Vector3(0.0, 10.0, 6.0)
+	add_child(audio_listener)
+	audio_listener.make_current()
 
 	global_position = target_pos
 	rotation.y = target_yaw
@@ -169,7 +176,7 @@ func get_view_polygon_world() -> PackedVector2Array:
 		var t: float = -origin.y / dir.y
 		t = clampf(t, 1.0, 140.0)
 		var hit: Vector3 = origin + dir * t
-		pts.append(Vector2(clampf(hit.x, -90.0, 90.0), clampf(hit.z, -90.0, 90.0)))
+		pts.append(Vector2(clampf(hit.x, -GameManager.MAP_HALF, GameManager.MAP_HALF), clampf(hit.z, -GameManager.MAP_HALF, GameManager.MAP_HALF)))
 	return pts
 
 
